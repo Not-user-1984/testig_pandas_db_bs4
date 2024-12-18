@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+perse/.DS_Store
 # Distribution / packaging
 .Python
 build/
@@ -22,6 +22,9 @@ var/
 wheels/
 share/python-wheels/
 *.egg-info/
+downloaded_xls_files/
+raw/
+download_xls.logs
 .installed.cfg
 *.egg
 MANIFEST
