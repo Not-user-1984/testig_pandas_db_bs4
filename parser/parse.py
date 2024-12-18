@@ -142,7 +142,7 @@ def main():
         if next_page_url:
             page_url = BASE_DOMAIN + next_page_url
             page_counter += 1
-            time.sleep(2)  # Добавляем задержку между запросами
+            time.sleep(2)
         else:
             logger.info("Достигнута последняя страница.")
             break

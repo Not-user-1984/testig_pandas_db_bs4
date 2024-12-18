@@ -111,10 +111,14 @@ def process_data(df, file_path):
             oil_id = exchange_product_id[:4]
             delivery_basis_id = exchange_product_id[4:7]
             delivery_type_id = exchange_product_id[-1]
+            # Извлекаем дату из строки
+
+            # date_str = row["Дата торгов"].split('_')[0]  # Берем только "12.12.2024"
+            # date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
             # Добавляем строку в результат
             result_df.loc[index] = [
-                index + 1,  # id
+                index + 1,
                 exchange_product_id,
                 exchange_product_name,
                 oil_id,
@@ -168,7 +172,7 @@ def main():
 
     if result_df is not None:
         # Сохраняем результаты в CSV-файл
-        result_df.to_csv("spimex_trading_results.csv", index=False, encoding="utf-8")
+        result_df.to_csv("app/spimex/migrations/cvs/spimex_trading_results.csv", index=False, encoding="utf-8")
         print("Результаты сохранены в файл: spimex_trading_results.csv")
 
 if __name__ == "__main__":
