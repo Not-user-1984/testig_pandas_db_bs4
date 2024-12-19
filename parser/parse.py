@@ -1,27 +1,12 @@
-# Основной скрипт
-
 import requests
 from bs4 import BeautifulSoup
 import time
 import pandas as pd
 import os
-import logging
-
-# Импорт констант из файла config.py
+from logger_config import logger
 from config import BASE_URL, BASE_DOMAIN, MIN_YEAR
 
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('download_xls.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
 
-# Функция для извлечения ссылок на XLS-файлы и даты торгов
 def extract_xls_links_and_dates(soup):
     """
     Извлекает все ссылки на XLS-файлы и даты торгов с текущей страницы.
@@ -30,7 +15,6 @@ def extract_xls_links_and_dates(soup):
     dates = []
 
     for item in soup.find_all("div", class_="accordeon-inner__item"):
-        # Извлекаем ссылку на XLS-файл
         link_element = item.find("a", class_="accordeon-inner__item-title link xls")
         if link_element:
             xls_links.append(link_element["href"])
@@ -66,7 +50,9 @@ def validate_date(date):
     if len(date_parts) >= 3:
         year = int(date_parts[-1])
         if year < MIN_YEAR:
-            logger.warning(f"Дата торгов {date} меньше {MIN_YEAR} года. Остановка парсинга.")
+            logger.warning(
+                f"Дата торгов {date} меньше {MIN_YEAR} года. Остановка парсинга."
+            )
             return False
     else:
         logger.warning(f"Некорректный формат даты: {date}")
@@ -86,7 +72,6 @@ def save_to_csv(dates, xls_links):
     }
     df = pd.DataFrame(data)
 
-    # Убираем строки, где дата или ссылка отсутствуют
     df = df[df["Дата торгов"].notna() & df["Ссылка на скачивание"].notna()]
 
     file_path = "raw/trading_results.csv"
@@ -131,21 +116,31 @@ def process_page(page_url, page_counter):
     return get_next_page_url(soup)
 
 
-# Основная функция
 def main():
     ensure_raw_folder_exists()
+
+    start_time = time.time()
+    logger.info("Начало парсинга...")
+
     page_url = BASE_URL
     page_counter = 1
+    total_files = 0
 
     while page_url:
         next_page_url = process_page(page_url, page_counter)
         if next_page_url:
             page_url = BASE_DOMAIN + next_page_url
             page_counter += 1
+            total_files += len(extract_xls_links_and_dates(BeautifulSoup(requests.get(page_url).text, "html.parser"))[0])
             time.sleep(2)
         else:
             logger.info("Достигнута последняя страница.")
             break
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logger.info(f"Парсинг завершён. Время выполнения: {elapsed_time:.2f} секунд.")
+    logger.info(f"Всего скачано файлов: {total_files}")
 
 
 if __name__ == "__main__":

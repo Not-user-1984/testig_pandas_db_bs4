@@ -17,16 +17,22 @@ class Command(BaseCommand):
                 csvreader = csv.reader(csvfile)
                 headers = next(csvreader)  # Skip the header row
                 for row in csvreader:
-                    # Преобразование строк в соответствующие типы
                     try:
+                        # Проверяем, что строка содержит данные для обработки
+                        if not row[1] or not row[2] or not row[3]:
+                            self.stdout.write(self.style.WARNING(f'Skipping row with missing data: {row}'))
+                            continue
+
                         # Преобразуем дату из формата "12.12.2024_4173" в объект datetime
-                        date_str = row[11].split('_')[0]  # Берем только "12.12.2024"
+                        date_str = row[10].split('_')[0]  # Берем только "12.12.2024"
                         date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
-                        # Преобразуем created_on и updated_on в объекты datetime
-                        created_on = datetime.strptime(row[12], '%Y-%m-%d %H:%M:%S.%f')
-                        updated_on = datetime.strptime(row[13], '%Y-%m-%d %H:%M:%S.%f')
+                        # Преобразуем числовые поля, обрабатываем пустые значения
+                        volume = int(row[7]) if row[7] else 0  # Если пусто, используем 0
+                        total = int(row[8]) if row[8] else 0  # Если пусто, используем 0
+                        count = int(row[9]) if row[9] else 0  # Если пусто, используем 0
 
+                        # Создаём объект модели
                         data = {
                             'exchange_product_id': row[1],
                             'exchange_product_name': row[2],
@@ -34,12 +40,10 @@ class Command(BaseCommand):
                             'delivery_basis_id': row[4],
                             'delivery_basis_name': row[5],
                             'delivery_type_id': row[6],
-                            'volume': int(row[8]),  # Преобразуем volume в целое число
-                            'total': int(row[9]),  # Преобразуем total в целое число
-                            'count': int(row[10]),  # Преобразуем count в целое число
-                            'date': date,  # Используем преобразованную дату
-                            'created_on': created_on,
-                            'updated_on': updated_on,
+                            'volume': volume,
+                            'total': total,
+                            'count': count,
+                            'date': date,
                         }
                         SpimexTradingResults.objects.create(**data)
                     except ValueError as e:

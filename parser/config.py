@@ -7,3 +7,7 @@ BASE_DOMAIN = "https://spimex.com"
 
 # Константа для года
 MIN_YEAR = 2023
+
+# Попка сохранения конечного результа
+URL_SAVE_DIR = "../app/spimex/migrations/cvs/spimex.cvs"
+LOG_SAVE_DIR = "parser.log"

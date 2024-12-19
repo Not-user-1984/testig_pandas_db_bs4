@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import os
 from datetime import datetime
+import time
 
 from logger_config import logger
 from config import MIN_YEAR
@@ -84,6 +85,9 @@ def download_xls_files():
     csv_file = "raw/trading_results.csv"
     base_save_dir = "downloaded_xls_files"
 
+    start_time = time.time()
+    logger.info("Начало работы парсера...")
+
     create_year_folders(base_save_dir)
 
     if not validate_csv_file(csv_file):
@@ -93,6 +97,13 @@ def download_xls_files():
 
     for index, row in df.iterrows():
         process_row(row, base_save_dir)
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    elapsed_time_minutes = elapsed_time / 60
+    logger.info(
+        f"Парсер завершил работу. Время выполнения: {elapsed_time_minutes:.2f} минут."
+        )
 
 
 if __name__ == "__main__":
