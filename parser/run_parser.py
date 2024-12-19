@@ -2,9 +2,8 @@ import time
 import argparse
 from logger_config import logger
 
-# Импортируем функции для каждого этапа
 from parse import main as parse_main
-from download_xls import download_xls_files as download_main
+from download_xls import main as download_main
 from to_results_csv import main as results_main
 
 

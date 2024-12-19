@@ -15,21 +15,18 @@ class Command(BaseCommand):
         try:
             with open(csv_file, newline='', encoding='utf-8') as csvfile:
                 csvreader = csv.reader(csvfile)
-                headers = next(csvreader)  # Skip the header row
+                headers = next(csvreader)
                 for row in csvreader:
                     try:
-                        # Проверяем, что строка содержит данные для обработки
                         if not row[1] or not row[2] or not row[3]:
                             self.stdout.write(self.style.WARNING(f'Skipping row with missing data: {row}'))
                             continue
 
-                        # Преобразуем дату из формата "12.12.2024_4173" в объект datetime
                         date_str = row[10].split('_')[0]  # Берем только "12.12.2024"
                         date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
-                        # Преобразуем числовые поля, обрабатываем пустые значения
-                        volume = int(row[7]) if row[7] else 0  # Если пусто, используем 0
-                        total = int(row[8]) if row[8] else 0  # Если пусто, используем 0
+                        volume = int(row[7]) if row[7] else 0 
+                        total = int(row[8]) if row[8] else 0
                         count = int(row[9]) if row[9] else 0  # Если пусто, используем 0
 
                         # Создаём объект модели

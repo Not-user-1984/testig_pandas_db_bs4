@@ -1,13 +1,13 @@
 import os
 import pyexcel as pe
 import pandas as pd
-from config import URL_SAVE_DIR
+from config import URL_SAVE_DIR, XML_SAVE_DIR
 from utils import normalize_csv, get_output_path
 from logger_config import logger
 import time
 
 
-def find_header_index(data):
+def _find_header_index(data):
     """
     Ищет индекс строки с заголовком "Единица измерения: Метрическая тонна".
     """
@@ -17,16 +17,16 @@ def find_header_index(data):
     return None
 
 
-def parse_xls_file(file_path):
+def _parse_xls_file(file_path):
     """
     Парсит XLS-файл и возвращает обработанный DataFrame.
     """
     try:
         data = pe.get_array(file_name=file_path)
 
-        header_index = find_header_index(data)
+        header_index = _find_header_index(data)
         if header_index is None:
-            logger.error(
+            logger.info(
                 f"Таблица 'Единица измерения: Метрическая тонна' не найдена в файле: {file_path}"
             )
             return None
@@ -57,11 +57,13 @@ def parse_xls_file(file_path):
 
         return df
     except Exception as e:
-        logger.error(f"Ошибка при обработке файла {file_path}: {e}")
+        logger.error(
+            f"Ошибка при обработке файла {file_path}: {e}"
+            )
         return None
 
 
-def process_data(df, file_path):
+def _process_data(df, file_path):
     """
     Обрабатывает данные и возвращает результирующий DataFrame.
     """
@@ -123,7 +125,7 @@ def process_data(df, file_path):
     return result_df
 
 
-def parse_all_xls_files(base_dir):
+def _parse_all_xls_files(base_dir):
     """
     Парсит все XLS-файлы в указанной директории.
     """
@@ -134,9 +136,9 @@ def parse_all_xls_files(base_dir):
                 file_path = os.path.join(root, file)
                 logger.info(f"Обрабатывается файл: {file_path}")
 
-                result = parse_xls_file(file_path)
+                result = _parse_xls_file(file_path)
                 if result is not None and not result.empty:
-                    processed_data = process_data(result, file_path)
+                    processed_data = _process_data(result, file_path)
                     if processed_data is not None:
                         all_data.append(processed_data)
 
@@ -153,17 +155,13 @@ def main():
     Основная функция для обработки XLS-файлов.
     """
     start_time = time.time()
-    base_dir = "downloaded_xls_files"
-    # base_dir = "test"
-    result_df = parse_all_xls_files(base_dir)
+
+    result_df = _parse_all_xls_files(XML_SAVE_DIR)
     if result_df is not None:
-        # Получаем базовый путь
         base_path = os.path.abspath(os.path.dirname(__file__))
 
-        # Получаем путь для сохранения файла
         output_path = get_output_path(base_path, URL_SAVE_DIR)
 
-        # Сохраняем данные в файл
         result_df.to_csv(output_path, index=False, encoding="utf-8")
         logger.info(f"Результаты сохранены в файл: {output_path}")
         end_time = time.time()

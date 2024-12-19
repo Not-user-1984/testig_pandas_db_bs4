@@ -5,10 +5,10 @@ from datetime import datetime
 import time
 
 from logger_config import logger
-from config import MIN_YEAR
+from config import MIN_YEAR, CSV_FILE, BASE_SAVE_DIR
 
 
-def download_xls(url, save_path):
+def _download_xls(url, save_path):
     """
     Скачивает XLS-файл по указанной ссылке и сохраняет его по указанному пути.
     """
@@ -23,7 +23,7 @@ def download_xls(url, save_path):
         logger.error(f"Ошибка при скачивании файла {url}: {e}")
 
 
-def create_year_folders(base_dir):
+def _create_year_folders(base_dir):
     """
     Создаёт папки для каждого года в указанной базовой директории.
     """
@@ -34,7 +34,7 @@ def create_year_folders(base_dir):
             logger.info(f"Создана папка: {year_folder}")
 
 
-def validate_csv_file(csv_file):
+def _validate_csv_file(csv_file):
     """
     Проверяет, существует ли CSV-файл и содержит ли он необходимые столбцы.
     """
@@ -56,7 +56,7 @@ def validate_csv_file(csv_file):
     return True
 
 
-def process_row(row, base_save_dir):
+def _process_row(row, base_save_dir):
     """
     Обрабатывает одну строку из CSV-файла, скачивает файл и сохраняет его.
     """
@@ -74,29 +74,27 @@ def process_row(row, base_save_dir):
         file_name = f"{date_obj.strftime('%d.%m.%Y')}_{row.name}.xls"
         save_path = os.path.join(base_save_dir, str(year), file_name)
         logger.info(f"Скачиваем файл: {url}")
-        download_xls(url, save_path)
+        _download_xls(url, save_path)
     except ValueError:
         logger.error(f"Не удалось распознать дату: {date}")
     except Exception as e:
         logger.error(f"Ошибка при обработке строки: {e}")
 
 
-def download_xls_files():
-    csv_file = "raw/trading_results.csv"
-    base_save_dir = "downloaded_xls_files"
+def main():
 
     start_time = time.time()
     logger.info("Начало работы парсера...")
 
-    create_year_folders(base_save_dir)
+    _create_year_folders(BASE_SAVE_DIR)
 
-    if not validate_csv_file(csv_file):
+    if not _validate_csv_file(CSV_FILE):
         return
 
-    df = pd.read_csv(csv_file, encoding="utf-8")
+    df = pd.read_csv(CSV_FILE, encoding="utf-8")
 
     for index, row in df.iterrows():
-        process_row(row, base_save_dir)
+        _process_row(row, BASE_SAVE_DIR)
 
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -107,4 +105,4 @@ def download_xls_files():
 
 
 if __name__ == "__main__":
-    download_xls_files()
+    main()

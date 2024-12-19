@@ -7,7 +7,7 @@ from logger_config import logger
 from config import BASE_URL, BASE_DOMAIN, MIN_YEAR
 
 
-def extract_xls_links_and_dates(soup):
+def _extract_xls_links_and_dates(soup):
     """
     Извлекает все ссылки на XLS-файлы и даты торгов с текущей страницы.
     """
@@ -32,7 +32,7 @@ def extract_xls_links_and_dates(soup):
     return xls_links, dates
 
 
-def get_next_page_url(soup):
+def _get_next_page_url(soup):
     """
     Извлекает ссылку на следующую страницу из пагинации.
     """
@@ -42,7 +42,7 @@ def get_next_page_url(soup):
     return None
 
 
-def validate_date(date):
+def _validate_date(date):
     """
     Проверяет, что дата соответствует минимальному году.
     """
@@ -60,7 +60,7 @@ def validate_date(date):
     return True
 
 
-def save_to_csv(dates, xls_links):
+def _save_to_csv(dates, xls_links):
     """
     Сохраняет данные в CSV-файл, добавляя новые данные в существующий файл.
     """
@@ -83,7 +83,7 @@ def save_to_csv(dates, xls_links):
     logger.info(f"Данные сохранены в файл: {file_path}")
 
 
-def ensure_raw_folder_exists():
+def _ensure_raw_folder_exists():
     """
     Проверяет и создает папку 'raw', если её нет.
     """
@@ -92,7 +92,7 @@ def ensure_raw_folder_exists():
         logger.info("Папка 'raw' создана.")
 
 
-def process_page(page_url, page_counter):
+def _process_page(page_url, page_counter):
     """
     Обрабатывает одну страницу, извлекает данные и сохраняет их.
     """
@@ -106,18 +106,18 @@ def process_page(page_url, page_counter):
         return None
 
     soup = BeautifulSoup(response.text, "html.parser")
-    xls_links, dates = extract_xls_links_and_dates(soup)
+    xls_links, dates = _extract_xls_links_and_dates(soup)
 
     for date in dates:
-        if date and not validate_date(date):
+        if date and not _validate_date(date):
             return None
 
-    save_to_csv(dates, xls_links)
-    return get_next_page_url(soup)
+    _save_to_csv(dates, xls_links)
+    return _get_next_page_url(soup)
 
 
 def main():
-    ensure_raw_folder_exists()
+    _ensure_raw_folder_exists()
 
     start_time = time.time()
     logger.info("Начало парсинга...")
@@ -127,11 +127,15 @@ def main():
     total_files = 0
 
     while page_url:
-        next_page_url = process_page(page_url, page_counter)
+        next_page_url = _process_page(page_url, page_counter)
         if next_page_url:
             page_url = BASE_DOMAIN + next_page_url
             page_counter += 1
-            total_files += len(extract_xls_links_and_dates(BeautifulSoup(requests.get(page_url).text, "html.parser"))[0])
+            total_files += len(
+                _extract_xls_links_and_dates(
+                    BeautifulSoup
+                    (requests.get(page_url).text, "html.parser"))[0]
+                    )
             time.sleep(2)
         else:
             logger.info("Достигнута последняя страница.")
@@ -139,7 +143,8 @@ def main():
 
     end_time = time.time()
     elapsed_time = end_time - start_time
-    logger.info(f"Парсинг завершён. Время выполнения: {elapsed_time:.2f} секунд.")
+    logger.info(
+        f"Парсинг завершён. Время выполнения: {elapsed_time:.2f} секунд.")
     logger.info(f"Всего скачано файлов: {total_files}")
 
 
