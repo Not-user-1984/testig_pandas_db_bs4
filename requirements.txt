@@ -5,3 +5,4 @@ SQLAlchemy==2.0.36
 python-dotenv==1.0.1
 psycopg2-binary==2.9.10
 pyexcel-xls==0.7.0
+Django==5.1.4
