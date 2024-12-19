@@ -22,14 +22,12 @@ class Command(BaseCommand):
                             self.stdout.write(self.style.WARNING(f'Skipping row with missing data: {row}'))
                             continue
 
-                        date_str = row[10].split('_')[0]  # Берем только "12.12.2024"
+                        date_str = row[10].split('_')[0]
                         date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
                         volume = int(row[7]) if row[7] else 0 
                         total = int(row[8]) if row[8] else 0
-                        count = int(row[9]) if row[9] else 0  # Если пусто, используем 0
-
-                        # Создаём объект модели
+                        count = int(row[9]) if row[9] else 0
                         data = {
                             'exchange_product_id': row[1],
                             'exchange_product_name': row[2],
