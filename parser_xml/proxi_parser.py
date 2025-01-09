@@ -5,6 +5,7 @@ import pandas as pd
 import os
 from logger_config import logger
 from config import BASE_URL, BASE_DOMAIN, MIN_YEAR
+import random
 
 
 def _extract_xls_links_and_dates(soup):
@@ -92,18 +93,50 @@ def _ensure_raw_folder_exists():
         logger.info("Папка 'raw' создана.")
 
 
-def _process_page(page_url, page_counter):
+def _load_proxies(file_path):
+    """
+    Загружает прокси из файла.
+    """
+    with open(file_path, "r") as file:
+        proxies = [line.strip() for line in file.readlines()]
+    return proxies
+
+
+def _get_random_proxy(proxies):
+    """
+    Возвращает случайный прокси из списка.
+    """
+    return random.choice(proxies)
+
+
+def _process_page(page_url, page_counter, proxies):
     """
     Обрабатывает одну страницу, извлекает данные и сохраняет их.
     """
     logger.info(f"Обрабатывается страница {page_counter}...")
 
+    # Используем случайный прокси
+    proxy = _get_random_proxy(proxies)
+    proxies_dict = {"http": f"http://{proxy}", "https": f"http://{proxy}"}
+
     try:
-        response = requests.get(page_url)
+        response = requests.get(
+            page_url, proxies=proxies_dict, timeout=15
+        )  # Увеличен таймаут
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        logger.error(f"Ошибка при загрузке страницы {page_url}: {e}")
-        return None
+        logger.error(
+            f"Ошибка при загрузке страницы {page_url} через прокси {proxy}: {e}"
+        )
+        # Удаляем неработающий прокси из списка
+        proxies.remove(proxy)
+        if proxies:
+            return _process_page(
+                page_url, page_counter, proxies
+            )  # Повторяем попытку с другим прокси
+        else:
+            logger.error("Нет доступных прокси. Остановка парсинга.")
+            return None
 
     soup = BeautifulSoup(response.text, "html.parser")
     xls_links, dates = _extract_xls_links_and_dates(soup)
@@ -122,29 +155,43 @@ def main():
     start_time = time.time()
     logger.info("Начало парсинга...")
 
+    # Загружаем прокси из файла
+    proxies = _load_proxies("working_proxies.txt")
+    if not proxies:
+        logger.error("Нет доступных прокси. Проверьте файл working_proxies.txt.")
+        return
+
     page_url = BASE_URL
     page_counter = 1
     total_files = 0
 
     while page_url:
-        next_page_url = _process_page(page_url, page_counter)
+        next_page_url = _process_page(page_url, page_counter, proxies)
         if next_page_url:
             page_url = BASE_DOMAIN + next_page_url
             page_counter += 1
             total_files += len(
                 _extract_xls_links_and_dates(
-                    BeautifulSoup
-                    (requests.get(page_url).text, "html.parser"))[0]
+                    BeautifulSoup(
+                        requests.get(
+                            page_url,
+                            proxies={
+                                "http": f"http://{_get_random_proxy(proxies)}",
+                                "https": f"http://{_get_random_proxy(proxies)}",
+                            },
+                        ).text,
+                        "html.parser",
                     )
-            time.sleep(2)
+                )[0]
+            )
+            time.sleep(2)  # Добавляем задержку между запросами
         else:
             logger.info("Достигнута последняя страница.")
             break
 
     end_time = time.time()
     elapsed_time = end_time - start_time
-    logger.info(
-        f"Парсинг завершён. Время выполнения: {elapsed_time:.2f} секунд.")
+    logger.info(f"Парсинг завершён. Время выполнения: {elapsed_time:.2f} секунд.")
     logger.info(f"Всего скачано файлов: {total_files}")
 
 

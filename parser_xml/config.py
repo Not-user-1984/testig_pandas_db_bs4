@@ -9,7 +9,7 @@ BASE_DOMAIN = "https://spimex.com"
 MIN_YEAR = 2023
 
 # Папка сохранения конечного результа
-URL_SAVE_DIR = "../app/spimex/migrations/cvs/spimex.cvs"
+URL_SAVE_DIR = "../parser_xml/results_csv/spimex.cvs"
 LOG_SAVE_DIR = "parser.log"
 XML_SAVE_DIR = "downloaded_xls_files"
 

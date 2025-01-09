@@ -1,17 +1,20 @@
 
 from pathlib import Path
-
+import environ
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+ENV_FILE_PATH = BASE_DIR.parent / 'app' / '.env'
 
-# SECURITY WARNING: keep the secret key used in production secret!
+env = environ.Env()
+environ.Env.read_env(ENV_FILE_PATH)
+
+# SECRET_KEY = env('SECRET_KEY', 'django-insecure-cy-g*5&f115ua56ls1&6(&_9+pw2s)21o6=bi_2_p883rs1+o_')
 SECRET_KEY = 'django-insecure-cy-g*5&f115ua56ls1&6(&_9+pw2s)21o6=bi_2_p883rs1+o_'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -65,11 +68,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'spimex_db'),
+        'USER': os.getenv('POSTGRES_USER', 'spimex_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'spimex_password'),
+        'HOST': os.getenv('POSTGRES_HOST', 'db'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

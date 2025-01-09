@@ -6,3 +6,8 @@ python-dotenv==1.0.1
 psycopg2-binary==2.9.10
 pyexcel-xls==0.7.0
 Django==5.1.4
+scrapy
+celery
+redis
+asyncpg>=0.26.0
+syncpg==0.30.0
