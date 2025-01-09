@@ -101,7 +101,8 @@ async def insert_data(pool, data: List[dict]):
 
 async def process_csv_file(pool):
     """Обрабатывает CSV-файл и загружает данные в базу данных."""
-    async with aiofiles.open(CSV_FILE_PATH, mode="r", encoding="utf-8") as file:
+    async with aiofiles.open(
+        CSV_FILE_PATH, mode="r", encoding="utf-8") as file:
         content = await file.read()
         lines = content.splitlines()
         reader = csv.DictReader(lines)
@@ -120,6 +121,15 @@ async def process_csv_file(pool):
                 batch = []
         if batch:
             await insert_data(pool, batch)
+
+
+async def delete_all_records():
+    """Удаляет все записи из таблицы spimex_spimextradingresults."""
+    pool = await asyncpg.create_pool(**DB_CONFIG)
+    async with pool.acquire() as connection:
+        async with connection.transaction():
+            await connection.execute("DELETE FROM spimex_spimextradingresults;")
+    await pool.close()
 
 
 async def main():

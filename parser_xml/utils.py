@@ -1,10 +1,6 @@
 import os
 import pandas as pd
 
-# from logger_config import logger
-# # Настройка логирования
-
-
 def normalize_csv(df):
     """
     Нормализует DataFrame:
