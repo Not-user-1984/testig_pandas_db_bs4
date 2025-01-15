@@ -22,6 +22,7 @@ async def get_session() -> AsyncSession:
     async with async_session() as session:
         yield session
 
+
 class UnitOfWork:
     def __init__(self):
         self.session_maker = async_session

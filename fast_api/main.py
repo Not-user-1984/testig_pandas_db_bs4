@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from api.v1.endpoints.trading import router as trading_router
+from core.cache import schedule_cache_reset
 
 
 def create_app() -> FastAPI:
@@ -11,6 +12,9 @@ def create_app() -> FastAPI:
     )
     app.include_router(trading_router, prefix="/api")
 
+    @app.on_event("startup")
+    async def startup():
+        schedule_cache_reset()
     return app
 
 
