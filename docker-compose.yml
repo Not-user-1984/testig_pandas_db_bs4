@@ -1,21 +1,9 @@
 version: '3.8'
 
 services:
-
-  web:
-    build: app/.
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - redis
-    env_file:
-      - .env
-
   db:
     image: postgres:14
+    container_name: postgres_db  
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -27,14 +15,71 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
+    networks:
+      - my_network    
 
   redis:
     image: redis:latest
+    container_name: redis
+    command: redis-server --bind 0.0.0.0
     restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - my_network
+
+  web:
+    build: admin/.
+    container_name: django_web
+
+    volumes:
+      - ./admin:/app
+      - ./admin/staticfiles:/app/staticfiles 
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    networks:
+      - my_network
+
+  fastapi:
+    build: fast_api/.
+    container_name: fastapi_service
+    volumes:
+      - ./fast_api:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - redis
+      - web
+    env_file:
+      - .env
+    networks:
+      - my_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./admin/static:/app/static
+    depends_on:
+      - web
+      - fastapi
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -9,7 +9,7 @@ from core.config import settings
 from aiocache.serializers import PickleSerializer
 
 cache = Cache(
-    Cache.REDIS, endpoint="localhost", port=6379, serializer=PickleSerializer()
+    Cache.REDIS, endpoint="redis", port=6379, serializer=PickleSerializer()
 )
 
 logging.basicConfig(level=logging.INFO)
