@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from database.unit_of_work import get_session
 from repositories.base import BaseRepository
-from infra.sql_raw.trading import TradingRepositoryImpl
+# from infra.sql_raw.trading import TradingRepositoryImpl
 from infra.sql.trading import SQLTradingRepository
 from repositories.trading import TradingRepository
 from services.trading import TradingService

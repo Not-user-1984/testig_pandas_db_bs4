@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class Settings(BaseSettings):
-    # Настройки PostgreSQL
     db_user: str = "spimex_user"
     db_password: str = "spimex_password"
     db_name: str = "spimex_db"
@@ -28,6 +27,5 @@ class Settings(BaseSettings):
             "redis_port": {"env": "REDIS_PORT"},
             "cache_reset_time": {"env": "CACHE_RESET_TIME"},
         }
-
 
 settings = Settings()
