@@ -27,5 +27,11 @@ class Settings(BaseSettings):
             "redis_port": {"env": "REDIS_PORT"},
             "cache_reset_time": {"env": "CACHE_RESET_TIME"},
         }
+    @property
+    def get_url(self) -> str:
+        """
+        Возвращает URL для подключения к базе данных.
+        """
+        return f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
 settings = Settings()
