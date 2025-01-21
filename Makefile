@@ -62,8 +62,8 @@ collectstatic:
 	docker-compose -f $(COMPOSE_FILE) exec $(SERVICE_WEB) python manage.py collectstatic --no-input
 
 # Run tests
-test:
-	docker-compose -f $(COMPOSE_FILE) exec $(SERVICE_WEB) python manage.py test
+tests:
+	docker-compose -f $(COMPOSE_FILE) exec $(SERVICE_FASTAPI) /bin/sh -c "pytest -vv"
 
 # Remove all unused Docker objects (images, volumes, networks)
 clean:

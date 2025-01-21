@@ -76,7 +76,7 @@ test_cases_trading_results = [
             len(results) >= 0
             and (
                 not results
-                or all(result.delivery_basis_id == "AN" for result in results)
+                or all(result.delivery_basis_id == "ANK" for result in results)
             )
         ),
     },
